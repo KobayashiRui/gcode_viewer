@@ -61,13 +61,28 @@ impl GcodeTextEditor {
                         .horizontal(|mut strip| {
                             strip.cell(|ui| {
                                 ui.spacing_mut().item_spacing = egui::vec2(0.0, 0.0);  
-                                ui.label(line_size_to_string(count_lines(gcode_data)));
+                                //ui.style_mut().visuals.extreme_bg_color = Color32::from_rgb(53, 140, 100);
+                                ui.painter().rect_filled(
+                                    ui.available_rect_before_wrap(),
+                                    0.0,
+                                    Color32::from_rgb(48, 82, 68),
+                                    //faded_color(Color32::from_rgb(77, 163, 109)),
+                                    //Color32::from_rgb(164, 192, 176),
+                                );
+
+                                //ui.spacing_mut().menu_margin = egui::Margin::same(100.0);
+                                ui.with_layout(egui::Layout::right_to_left(egui::Align::TOP), |ui| {
+                                    ui.label(line_size_to_string(count_lines(gcode_data)));
+                                });
+
                                 //ui.add_sized(
                                 //    ui.available_size(), 
                                 //    egui::TextEdit::multiline(&mut line_size_to_string(count_lines(gcode_data))));
                             });
                             strip.cell(|ui| {
-                                ui.spacing_mut().item_spacing = egui::vec2(1.0, 0.0);  
+                                ui.spacing_mut().item_spacing = egui::vec2(0.0, 0.0);  
+                                ui.style_mut().visuals.extreme_bg_color = Color32::from_rgb(164, 192, 176);
+                                ui.style_mut().visuals.override_text_color = Some(Color32::from_rgb(33, 33, 33));
                                 ui.add_sized(ui.available_size(), egui::TextEdit::multiline(gcode_data));
                             });
                     });
