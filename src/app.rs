@@ -33,12 +33,16 @@ impl eframe::App for MainApp {
         egui::SidePanel::left("left_panel")
             .show(ctx, |ui| {
 
-                ui.label("Gcode Viewer");
+                //ui.label("Gcode Viewer");
                 //egui::ScrollArea::vertical().show(ui, |ui| {
-                //    ui.label("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+                //    ui.label("Gcode Viewer");
+                //    self.gcode_text_editor.update(ui)
                 //});
                 //Gcode text data
+
+                ui.label("Gcode Viewer");
                 self.gcode_text_editor.update(ui)
+                //self.gcode_text_editor.update(ui)
             });
 
         egui::CentralPanel::default().show(ctx, |ui| {
