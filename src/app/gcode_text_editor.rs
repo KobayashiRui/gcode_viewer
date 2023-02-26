@@ -14,6 +14,7 @@ use egui_extras::{Size, StripBuilder};
 pub struct GcodeTextEditor {
     gcode_data: String,
     selected_row: usize,
+    picked_path: Option<String>
 } 
 
 fn count_lines(s: &String) -> usize {
@@ -34,11 +35,12 @@ impl GcodeTextEditor {
         Self{
             gcode_data: "G1 X100 \nG1 X200".to_string(),
             selected_row: 0,
+            picked_path: None,
         }
     }
 
     pub fn update(&mut self, ui: &mut egui::Ui){
-        let Self { gcode_data , selected_row} = self;
+        let Self { gcode_data , selected_row, picked_path} = self;
 
         let dark_mode = ui.visuals().dark_mode;
         let faded_color = ui.visuals().window_fill();
@@ -47,6 +49,22 @@ impl GcodeTextEditor {
             let t = if dark_mode { 0.95 } else { 0.8 };
             egui::lerp(Rgba::from(color)..=Rgba::from(faded_color), t).into()
         };
+
+        ui.label("Gcode File");
+        if ui.button("Open file…").clicked() {
+            if let Some(path) = rfd::FileDialog::new().pick_file() {
+                self.picked_path = Some(path.display().to_string());
+                println!("Update picked path: {:?}", self.picked_path);
+            }
+        }
+        if let Some(picked_path) = &self.picked_path {
+            ui.horizontal(|ui| {
+                ui.label("Picked file:");
+                ui.monospace(picked_path);
+            });
+        }
+
+
 
         ui.spacing_mut().item_spacing = egui::vec2(0.0, 0.0);
 
@@ -61,7 +79,7 @@ impl GcodeTextEditor {
                     //builder.sizes(Size::remainder(), 2).horizontal(|mut strip| {
                     builder
                         .size(Size::exact(50.0))
-                        .size(Size::exact(150.0))
+                        .size(Size::exact(250.0))
                         .horizontal(|mut strip| {
                             strip.cell(|ui| {
                                 ui.spacing_mut().item_spacing = egui::vec2(5.0, 0.0);  
