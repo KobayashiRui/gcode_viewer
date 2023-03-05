@@ -10,11 +10,11 @@ use eframe::{
 use eframe::egui;
 
 mod gcode_path_3d;
-mod gcode_text_editor;
+mod gcode_text_editor_v2;
 
 pub struct MainApp {
     gcode_path_3d: gcode_path_3d::GcodePath3d,
-    gcode_text_editor: gcode_text_editor::GcodeTextEditor,
+    gcode_text_editor: gcode_text_editor_v2::GcodeTextEditor,
 }
 
 impl MainApp {
@@ -22,7 +22,7 @@ impl MainApp {
         
         Self {
             gcode_path_3d: gcode_path_3d::GcodePath3d::new(cc),
-            gcode_text_editor: gcode_text_editor::GcodeTextEditor::new(),
+            gcode_text_editor: gcode_text_editor_v2::GcodeTextEditor::new(),
         }
     }
 }
