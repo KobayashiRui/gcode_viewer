@@ -11,6 +11,7 @@ use eframe::egui;
 
 mod gcode_path_3d;
 mod gcode_text_editor_v2;
+mod calculate_print_time;
 
 pub struct MainApp {
     gcode_path_3d: gcode_path_3d::GcodePath3d,
@@ -19,6 +20,7 @@ pub struct MainApp {
 
 impl MainApp {
     pub fn new(cc: &eframe::CreationContext) -> Self {
+
         
         Self {
             gcode_path_3d: gcode_path_3d::GcodePath3d::new(cc),
@@ -27,7 +29,7 @@ impl MainApp {
     }
 }
 
-impl eframe::App for MainApp {
+impl eframe::App for MainApp{
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
 
         egui::SidePanel::left("left_panel")
@@ -41,6 +43,10 @@ impl eframe::App for MainApp {
                 //Gcode text data
 
                 ui.label("Gcode Viewer");
+                if ui.add(egui::Button::new("Calculate Time")).clicked() {
+                    calculate_print_time::calculate_print_time(self.gcode_text_editor.get_gcode_data())
+                }
+                
                 self.gcode_text_editor.update(ui)
                 //self.gcode_text_editor.update(ui)
             });
