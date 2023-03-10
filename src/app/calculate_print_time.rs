@@ -1,6 +1,11 @@
-pub fn calculate_print_time(gcode_data: &String) {
+use glam::{swizzles::*, Vec3, Vec3A};
+
+pub fn calculate_print_time(gcode_data: &String) -> f32 {
     println!("Start calculating print time");
     let mut counter = 0;
+    let mut all_time = 0.0; //s
+    let mut now_pos = Vec3::new(0.0, 0.0, 0.0); //mm
+    let mut speed: f32 = 0.0; //speed: mm/s
     for line in gcode_data.lines() {
         if line.len() != 0 {
             let top_char = line.chars().nth(0).unwrap();
@@ -14,10 +19,10 @@ pub fn calculate_print_time(gcode_data: &String) {
             //println!("{}", g[0]);
             match g[0]{
                 "G1" => {
-                    let mut x = 0.0;
-                    let mut y = 0.0;
-                    let mut z = 0.0;
-                    let mut f = 0.0;
+                    let mut x = now_pos.x;
+                    let mut y = now_pos.y;
+                    let mut z = now_pos.z;
+                    //let mut f = 0.0;
                     let mut e = 0.0;
 
                     let _x = g.iter().find(|s| s.contains("X"));
@@ -40,10 +45,26 @@ pub fn calculate_print_time(gcode_data: &String) {
 
                     let _f = g.iter().find(|s| s.contains("F"));
                     if _f != None {
-                        f =  _f.unwrap().replace("F", "").parse::<f32>().unwrap();
+                        let f =  _f.unwrap().replace("F", "").parse::<f32>().unwrap(); // [mm/min]
+                        speed = f / 60.0; // [mm/s]
                     }
 
-                    println!("[Line{}] Move X{} Y{} Z{} Extrude E{} Speed F{}", counter, x, y, z, e, f);
+                    //println!("[Line{}] Move X{} Y{} Z{} Extrude E{} Speed F{}", counter, x, y, z, e, speed);
+
+                    //移動量の計算
+                    //xyzの移動がなく、eの量がある
+                    let target_vec = Vec3::new(x, y, z);
+                    let move_vec = target_vec - now_pos;
+                    let move_length = move_vec.length();
+
+                    if x==now_pos.x && y==now_pos.y && z==now_pos.z && e != 0.0{
+                        let time = e / speed; // time sec
+                        all_time += time
+                    }else{
+                        let time = move_length / speed; // time sec
+                        all_time += time;
+                        now_pos = target_vec;
+                    }
                 },
                 "G2" => {
                     let mut x = 0.0;
@@ -79,8 +100,8 @@ pub fn calculate_print_time(gcode_data: &String) {
                     if _e != None {
                         e =  _e.unwrap().replace("E", "").parse::<f32>().unwrap();
                     }
-
-                    println!("[Line{}] Rotate X{} Y{} I{} J{} Extrude E{} Speed F{}", counter, x, y, i, j, e, f);
+                    //println!("[Line{}] Rotate X{} Y{} I{} J{} Extrude E{} Speed F{}", counter, x, y, i, j, e, f);
+                    //all_time += 1.0;
                 },
                 "G4" => {
                     let mut p = 0.0;
@@ -94,8 +115,10 @@ pub fn calculate_print_time(gcode_data: &String) {
                     if _s != None {
                         s =  _s.unwrap().replace("S", "").parse::<f32>().unwrap();
                     }
-                    println!("[Line{}] Wait P{} S{}", counter, p, s);
+                    //println!("[Line{}] Wait P{} S{}", counter, p, s);
 
+                    let time = (p*0.001) + s; // time sec
+                    all_time += time;
                 },
                 _ => {
                 }
@@ -105,4 +128,6 @@ pub fn calculate_print_time(gcode_data: &String) {
         }
     }
 
+    println!("ALL Time {}[s]", all_time);
+    return all_time
 }
