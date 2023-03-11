@@ -144,93 +144,93 @@ impl GcodeTextEditor {
 
         ui.spacing_mut().item_spacing = egui::vec2(0.0, 0.0);
 
-        egui::ScrollArea::vertical()
+        //egui::ScrollArea::vertical()
+        egui::ScrollArea::both()
             .max_height(500.0)
             .show(ui,  |ui| {
 
-        StripBuilder::new(ui)
-            .size(Size::remainder())
-            .size(Size::remainder())
-            .vertical(|mut strip| {
-                strip.strip(|builder| {
-                    builder
-                        .size(Size::exact(100.0))
-                        .size(Size::exact(400.0))
-                        .horizontal(|mut strip| {
-                            strip.cell(|ui| {
-                                ui.spacing_mut().item_spacing = egui::vec2(5.0, 0.0);  
-                                egui::Frame::none()
-                                    .fill(Color32::from_rgb(53, 140, 100))
-                                    .show(ui, |ui| {
+            StripBuilder::new(ui)
+                .size(Size::remainder().at_most(600.0))
+                .vertical(|mut strip| {
+                    strip.strip(|builder| {
+                        builder
+                            .size(Size::exact(100.0))
+                            .size(Size::exact(400.0))
+                            .horizontal(|mut strip| {
+                                strip.cell(|ui| {
+                                    ui.spacing_mut().item_spacing = egui::vec2(5.0, 0.0);  
+                                    egui::Frame::none()
+                                        .fill(Color32::from_rgb(53, 140, 100))
+                                        .show(ui, |ui| {
 
-                                        //let mut line_data = &line_size_to_string(count_lines(&self.gcode_data)) as &str;
-                                        let mut l = &self.line_data as &str;
-                                        let text_edit_output = egui::TextEdit::multiline(&mut l)
-                                                                            //.min_size(ui.available_size())
-                                                                            //.layouter(&mut layouter)
-                                                                            .show(ui);
+                                            //let mut line_data = &line_size_to_string(count_lines(&self.gcode_data)) as &str;
+                                            let mut l = &self.line_data as &str;
+                                            let text_edit_output = egui::TextEdit::multiline(&mut l)
+                                                                                //.min_size(ui.available_size())
+                                                                                //.layouter(&mut layouter)
+                                                                                .show(ui);
 
-                                        let rect_data = text_edit_output.response.rect;
-                                        let row_num = self.selected_row as f32;
-                                        ui.painter().rect_filled(
-                                            egui::Rect::from_min_max(egui::Pos2::new(rect_data.left(), rect_data.top()+(row_num*14.0)+1.0 ), egui::Pos2::new(rect_data.right(), rect_data.top()+(row_num*14.0)+1.0+14.0)),
-                                            0.0,
-                                            Color32::from_rgba_premultiplied(100, 0, 0, 20),
-                                            //faded_color(Color32::from_rgb(77, 163, 109)),
-                                            //Color32::from_rgb(164, 192, 176),
-                                        );
+                                            let rect_data = text_edit_output.response.rect;
+                                            let row_num = self.selected_row as f32;
+                                            ui.painter().rect_filled(
+                                                egui::Rect::from_min_max(egui::Pos2::new(rect_data.left(), rect_data.top()+(row_num*14.0)+1.0 ), egui::Pos2::new(rect_data.right(), rect_data.top()+(row_num*14.0)+1.0+14.0)),
+                                                0.0,
+                                                Color32::from_rgba_premultiplied(100, 0, 0, 20),
+                                                //faded_color(Color32::from_rgb(77, 163, 109)),
+                                                //Color32::from_rgb(164, 192, 176),
+                                            );
 
-                                    });
-                            });
+                                        });
+                                });
 
-                            strip.cell(|ui| {
-                                ui.spacing_mut().item_spacing = egui::vec2(5.0, 0.0);  
-                                ui.style_mut().visuals.extreme_bg_color = Color32::from_rgb(164, 192, 176);
-                                ui.style_mut().visuals.override_text_color = Some(Color32::from_rgb(33, 33, 33));
-                                let mut layouter = |ui: &egui::Ui, string: &str, wrap_width: f32| {
-                                    let mut layout_job = egui::text::LayoutJob::default();
-                                    layout_job.append(
-                                        string,
-                                        0.0,     
-                                        egui::TextFormat {
-                                            font_id: egui::FontId::new(12.0, egui::FontFamily::Monospace),
-                                            color: Color32::BLACK,
-                                            //background: Color32::RED,
-                                            ..Default::default()
-                                        },);
-                                    
-                                    
-                                    ui.fonts(|f| f.layout_job(layout_job))
-                                };
-
-                                
-                                let text_edit_output = egui::TextEdit::multiline(&mut self.gcode_data)
-                                                                    //.min_size(ui.available_size())
-                                                                    .desired_rows(10)
-                                                                    .desired_width(f32::INFINITY)
-                                                                    .layouter(&mut layouter)
-                                                                    .show(ui);
-
-                                let rect_data = text_edit_output.response.rect;
-                                let row_num = self.selected_row as f32;
-                                ui.painter().rect_filled(
-                                    egui::Rect::from_min_max(egui::Pos2::new(rect_data.left(), rect_data.top()+(row_num*14.0)+1.0 ), egui::Pos2::new(rect_data.right(), rect_data.top()+(row_num*14.0)+1.0+14.0)),
-                                    0.0,
-                                    Color32::from_rgba_premultiplied(100, 0, 0, 20),
-                                );
+                                strip.cell(|ui| {
+                                    ui.spacing_mut().item_spacing = egui::vec2(5.0, 0.0);  
+                                    ui.style_mut().visuals.extreme_bg_color = Color32::from_rgb(164, 192, 176);
+                                    ui.style_mut().visuals.override_text_color = Some(Color32::from_rgb(33, 33, 33));
+                                    let mut layouter = |ui: &egui::Ui, string: &str, wrap_width: f32| {
+                                        let mut layout_job = egui::text::LayoutJob::default();
+                                        layout_job.append(
+                                            string,
+                                            0.0,     
+                                            egui::TextFormat {
+                                                font_id: egui::FontId::new(12.0, egui::FontFamily::Monospace),
+                                                color: Color32::BLACK,
+                                                //background: Color32::RED,
+                                                ..Default::default()
+                                            },);
+                                        
+                                        
+                                        ui.fonts(|f| f.layout_job(layout_job))
+                                    };
 
 
-                                let cursor_pos = text_edit_output.cursor_range;
+                                    let text_edit_output = egui::TextEdit::multiline(&mut self.gcode_data)
+                                                                        //.min_size(ui.available_size())
+                                                                        .desired_rows(10)
+                                                                        .desired_width(0.0)
+                                                                        .layouter(&mut layouter)
+                                                                        .show(ui);
+
+                                    let rect_data = text_edit_output.response.rect;
+                                    let row_num = self.selected_row as f32;
+                                    //ui.painter().rect_filled(
+                                    //    egui::Rect::from_min_max(egui::Pos2::new(rect_data.left(), rect_data.top()+(row_num*14.0)+1.0 ), egui::Pos2::new(rect_data.right(), rect_data.top()+(row_num*14.0)+1.0+14.0)),
+                                    //    0.0,
+                                    //    Color32::from_rgba_premultiplied(100, 0, 0, 20),
+                                    //);
 
 
-                                if let Some(cursor_pos) = cursor_pos {
+                                    let cursor_pos = text_edit_output.cursor_range;
 
-                                    self.selected_row = cursor_pos.primary.rcursor.row;
-                                }
-                            });
+
+                                    if let Some(cursor_pos) = cursor_pos {
+
+                                        self.selected_row = cursor_pos.primary.rcursor.row;
+                                    }
+                                });
+                        });
                     });
                 });
-            });
 
         });
 

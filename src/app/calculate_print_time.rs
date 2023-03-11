@@ -7,16 +7,17 @@ pub fn calculate_print_time(gcode_data: &String) -> f32 {
     let mut now_pos = Vec3::new(0.0, 0.0, 0.0); //mm
     let mut speed: f32 = 0.0; //speed: mm/s
     for line in gcode_data.lines() {
+        //println!("Counter: {}", counter);
+        counter += 1;
         if line.len() != 0 {
-            let top_char = line.chars().nth(0).unwrap();
-            //Commnet OUt
-            if top_char == ';' {
-                //println!("[Line{}] CommentOut", counter);
+            let comment_pos = line.find(';').unwrap_or(line.len());
+            let new_line = &line[..comment_pos];
+            if new_line.len() == 0 {
                 continue;
             }
 
-            let g: Vec<&str> = line.split(' ').collect();
-            //println!("{}", g[0]);
+            let g: Vec<&str> = new_line.split(' ').collect();
+            //println!("Gcode: {}", g[0]);
             match g[0]{
                 "G1" => {
                     let mut x = now_pos.x;
@@ -50,6 +51,10 @@ pub fn calculate_print_time(gcode_data: &String) -> f32 {
                     }
 
                     //println!("[Line{}] Move X{} Y{} Z{} Extrude E{} Speed F{}", counter, x, y, z, e, speed);
+
+                    if x==now_pos.x && y==now_pos.y && z==now_pos.z && e == 0.0{
+                        continue;
+                    }
 
                     //移動量の計算
                     //xyzの移動がなく、eの量がある
@@ -121,10 +126,10 @@ pub fn calculate_print_time(gcode_data: &String) -> f32 {
                     all_time += time;
                 },
                 _ => {
+                    //println!("No Process {}", g[0]);
                 }
             }
 
-            counter += 1;
         }
     }
 
