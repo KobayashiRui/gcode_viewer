@@ -8,7 +8,8 @@ use eframe::{
 };
 
 use eframe::egui;
-use gcode_viewer::utils;
+use crate::utils;
+//use gcode_viewer::utils;
 
 mod gcode_path_3d;
 mod gcode_text_editor_v2;

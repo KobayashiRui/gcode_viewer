@@ -1,9 +1,14 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
+
 use core::num;
+use std::io::Read;
 use std::{num::NonZeroU64, sync::Arc};
 use std::fs;
 use std::path::Path;
+use std::sync::mpsc::{Sender, Receiver};
+use std::sync::mpsc;
+
 
 use eframe::{
     egui_wgpu::wgpu::util::DeviceExt,
@@ -16,11 +21,18 @@ use egui::Color32;
 
 use egui_extras::{Size, StripBuilder};
 
+struct ReadFileData{
+    file_name: String,
+    file_data : String,
+}
+
 pub struct GcodeTextEditor{
     gcode_data: String,
     line_data:  String,
     selected_row:  usize,
     picked_path: Option<String>,
+    read_file_receiver: Receiver<ReadFileData>,
+    read_file_sender: Sender<ReadFileData>,
 } 
 
 fn count_lines(s: &String) -> usize {
@@ -39,17 +51,32 @@ impl GcodeTextEditor {
 
     pub fn new() -> Self{
 
+        let (tx, rx): (Sender<ReadFileData>, Receiver<ReadFileData>) = mpsc::channel();
+
         Self{
             gcode_data: "G1 X100 \nG1 X200".to_string(),
             line_data: "1\n2\n".to_string(),
             selected_row: 0,
             picked_path: None,
+            read_file_receiver: rx,
+            read_file_sender: tx,
         }
     }
 
 
     pub fn get_gcode_data(&self) -> &String {
         &self.gcode_data
+    }
+
+    async fn read_file(&mut self){
+        let file = rfd::AsyncFileDialog::new()
+                            .pick_file()
+                            .await;
+        let data = file.unwrap().read().await;
+        let content = String::from_utf8(data).unwrap();
+        println!("Read file: {}", content);
+        //self.line_data = line_size_to_string(count_lines(&content));
+        //self.gcode_data = content;
     }
 
     pub fn update(&mut self, ui: &mut egui::Ui){
@@ -63,28 +90,48 @@ impl GcodeTextEditor {
             egui::lerp(Rgba::from(color)..=Rgba::from(faded_color), t).into()
         };
 
+        match self.read_file_receiver.try_recv() {
+            Ok(rf) =>{
+                //println!("Counter: {}", counter);
+                println!("Get Message");
+                self.line_data = line_size_to_string(count_lines(&rf.file_data));
+                self.gcode_data = rf.file_data;
+            },
+            Err(e)=>{},
+        };
+
         ui.label("Gcode File");
         if ui.button("Open file…").clicked() {
-            if let Some(path) = rfd::FileDialog::new().pick_file() {
-                self.picked_path = Some(path.display().to_string());
+            let thread_tx = self.read_file_sender.clone();
+            execute(async move{
+                let file = rfd::AsyncFileDialog::new()
+                                    .pick_file()
+                                    .await;
+                let data = file.unwrap().read().await;
+                let content = String::from_utf8(data).unwrap();
+                thread_tx.send(ReadFileData{file_name:"".to_string(), file_data:content}).unwrap();
+            });
+            //let rf = self.read_file_receiver.recv().unwrap();
+            //self.line_data = line_size_to_string(count_lines(&rf.file_data));
+            //self.gcode_data = rf.file_data;
+            //if let Some(path) = rfd::FileDialog::new().pick_file() {
+            //    self.picked_path = Some(path.display().to_string());
 
-                println!("Update picked path: {:?}", self.picked_path);
+            //    println!("Update picked path: {:?}", self.picked_path);
 
-                //load file
-                if let Some(picked_path) = &self.picked_path {
-                    let path_data = Path::new(&picked_path);
-                    match fs::read_to_string(path_data) {
-                        Ok(content) => {
-                            //println!("{}", content);
-                            self.line_data = line_size_to_string(count_lines(&content));
-                            self.gcode_data = content;
-                        }
-                        Err(error) => {println!("Please Select Gcode File")},
-                    }
-                    
-                }
-
-                }
+            //    //load file
+            //    if let Some(picked_path) = &self.picked_path {
+            //        let path_data = Path::new(&picked_path);
+            //        match fs::read_to_string(path_data) {
+            //            Ok(content) => {
+            //                //println!("{}", content);
+            //                self.line_data = line_size_to_string(count_lines(&content));
+            //                self.gcode_data = content;
+            //            }
+            //            Err(error) => {println!("Please Select Gcode File")},
+            //        }
+            //    }
+            //}
         }
         if let Some(picked_path) = &self.picked_path {
             ui.horizontal(|ui| {
@@ -94,8 +141,6 @@ impl GcodeTextEditor {
             });
 
         }
-
-
 
         ui.spacing_mut().item_spacing = egui::vec2(0.0, 0.0);
 
@@ -191,4 +236,17 @@ impl GcodeTextEditor {
 
 
     }
+}
+
+use std::future::Future;
+
+#[cfg(not(target_arch = "wasm32"))]
+fn execute<F: Future<Output = ()> + Send + 'static>(f: F) {
+    // this is stupid... use any executor of your choice instead
+    std::thread::spawn(move || futures::executor::block_on(f));
+}
+
+#[cfg(target_arch = "wasm32")]
+fn execute<F: Future<Output = ()> + 'static>(f: F) {
+    wasm_bindgen_futures::spawn_local(f);
 }

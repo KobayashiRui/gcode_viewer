@@ -1,8 +1,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
 use eframe::egui;
+use gcode_viewer::app;
 
-mod app;
+//mod app;
 
 // When compiling natively:
 fn main() -> Result<(), eframe::Error> {
