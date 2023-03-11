@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Hello wasm-pack!</title>
+    <style>
+
+      html,
+      body {
+          overflow: hidden;
+          margin: 0 !important;
+          padding: 0 !important;
+          height: 100%;
+          width: 100%;
+      }
+
+      canvas {
+            margin-right: auto;
+            margin-left: auto;
+            display: block;
+            position: absolute;
+            top: 0%;
+            left: 50%;
+            transform: translate(-50%, 0%);
+      }
+
+    </style>
+  </head>
+  <body>
+    <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
+    <canvas id="the_canvas_id"></canvas>
+    <script src="./bootstrap.js"></script>
+  </body>
+</html>
