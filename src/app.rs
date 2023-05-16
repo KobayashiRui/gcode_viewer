@@ -22,6 +22,7 @@ pub struct MainApp {
     gcode_path_3d: gcode_path_3d::GcodePath3d,
     gcode_text_editor: gcode_text_editor_v2::GcodeTextEditor,
     print_time_data: utils::TimeData,
+    error_line: i32,
 }
 
 impl MainApp {
@@ -33,6 +34,7 @@ impl MainApp {
             print_time_data: utils::TimeData::new(),
             gcode_path_3d: gcode_path_3d::GcodePath3d::new(cc),
             gcode_text_editor: gcode_text_editor_v2::GcodeTextEditor::new(),
+            error_line: -1,
         }
     }
 }
@@ -55,8 +57,20 @@ impl eframe::App for MainApp{
                 ui.label(format!("Print time Sec:{}", self.print_time));
                 ui.label(format!("Print time: {}d, {}h, {}m", self.print_time_data.day, self.print_time_data.hour, self.print_time_data.minute));
                 if ui.add(egui::Button::new("Calculate Time")).clicked() {
-                    self.print_time = calculate_print_time::calculate_print_time(self.gcode_text_editor.get_gcode_data());
-                    self.print_time_data =utils::sec_to_days_hours_minutes(self.print_time);
+                    self.error_line = -1;
+                    let result = calculate_print_time::calculate_print_time(self.gcode_text_editor.get_gcode_data());
+                    match result {
+                        Ok(n) => {
+                            self.print_time = n;
+                            self.print_time_data =utils::sec_to_days_hours_minutes(self.print_time);
+                        },
+                        Err(e)=>{
+                            self.error_line = e;
+                        }
+                    }
+                }
+                if self.error_line != -1 {
+                    ui.label(format!("Error occurred on line {} !!", self.error_line));
                 }
                 
                 self.gcode_text_editor.update(ui)

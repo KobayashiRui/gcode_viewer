@@ -1,15 +1,21 @@
 use glam::{swizzles::*, Vec3, Vec3A};
 
-pub fn calculate_print_time(gcode_data: &String) -> f32 {
+pub fn calculate_print_time(gcode_data: &String) -> Result<f32, i32> {
     println!("Start calculating print time");
     let mut counter = 0;
-    let mut all_time = 0.0; //s
+    let mut all_time: f32 = 0.0; //s
     let mut now_pos = Vec3::new(0.0, 0.0, 0.0); //mm
     let mut speed: f32 = 0.0; //speed: mm/s
     for line in gcode_data.lines() {
         //println!("Counter: {}", counter);
         counter += 1;
         if line.len() != 0 {
+            //println!("c: {} = t:{}", counter, all_time);
+            if all_time.is_nan() {
+                println!("NAN!");
+                println!("ERROR:{}", counter-1);
+                return Err(counter-1)
+            }
             let comment_pos = line.find(';').unwrap_or(line.len());
             let new_line = &line[..comment_pos];
             if new_line.len() == 0 {
@@ -64,7 +70,7 @@ pub fn calculate_print_time(gcode_data: &String) -> f32 {
 
                     if x==now_pos.x && y==now_pos.y && z==now_pos.z && e != 0.0{
                         let time = e / speed; // time sec
-                        all_time += time
+                        all_time += time;
                     }else{
                         let time = move_length / speed; // time sec
                         all_time += time;
@@ -134,5 +140,5 @@ pub fn calculate_print_time(gcode_data: &String) -> f32 {
     }
 
     println!("ALL Time {}[s]", all_time);
-    return all_time
+    return Ok(all_time)
 }
