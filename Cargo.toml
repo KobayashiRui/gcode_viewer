@@ -2,6 +2,7 @@
 name = "gcode_viewer"
 version = "0.1.0"
 edition = "2021"
+description = "Tool to visualize gcode."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
@@ -29,3 +30,18 @@ wasm-bindgen-futures = "0.4"
 
 [profile.release]
 opt-level = "s"
+
+[package.metadata.bundle]
+name = "Gcode Viewer"
+identifier = "io.github.ruikobayashi.gcodeviewer"
+version = "0.1.0"
+resources = ["assets", "images/**/*.png", "secrets/public_key.txt"]
+copyright = "Copyright (c) Rui Kobayashi. All rights reserved."
+category = "Developer Tool"
+short_description = "Tool to visualize gcode."
+long_description = """
+Gcodeを分析し、表示・編集するツールです。
+"""
+#deb_depends = ["libgl1-mesa-glx", "libsdl2-2.0-0 (>= 2.0.5)"]
+#osx_frameworks = ["SDL2"]
+#osx_url_schemes = ["com.doe.exampleapplication"]
