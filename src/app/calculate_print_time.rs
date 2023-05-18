@@ -1,7 +1,7 @@
 use glam::{swizzles::*, Vec3, Vec3A};
 
 pub fn calculate_print_time(gcode_data: &String) -> Result<f32, i32> {
-    println!("Start calculating print time");
+    println!("Start calculating print time!");
     let mut counter = 0;
     let mut all_time: f32 = 0.0; //s
     let mut now_pos = Vec3::new(0.0, 0.0, 0.0); //mm
