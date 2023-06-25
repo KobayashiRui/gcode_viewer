@@ -11,8 +11,10 @@ use eframe::egui;
 use crate::utils;
 //use gcode_viewer::utils;
 
+use egui_clip_textedit;
+
 mod gcode_path_3d;
-mod gcode_text_editor_v2;
+mod gcode_text_editor_v3;
 mod calculate_print_time;
 
 
@@ -20,7 +22,7 @@ mod calculate_print_time;
 pub struct MainApp {
     print_time: f32,
     gcode_path_3d: gcode_path_3d::GcodePath3d,
-    gcode_text_editor: gcode_text_editor_v2::GcodeTextEditor,
+    gcode_text_editor: gcode_text_editor_v3::GcodeTextEditor,
     print_time_data: utils::TimeData,
     error_line: i32,
 }
@@ -33,7 +35,7 @@ impl MainApp {
             print_time: 0.0,
             print_time_data: utils::TimeData::new(),
             gcode_path_3d: gcode_path_3d::GcodePath3d::new(cc),
-            gcode_text_editor: gcode_text_editor_v2::GcodeTextEditor::new(),
+            gcode_text_editor: gcode_text_editor_v3::GcodeTextEditor::new(),
             error_line: -1,
         }
     }
@@ -58,7 +60,7 @@ impl eframe::App for MainApp{
                 ui.label(format!("Print time: {}d, {}h, {}m", self.print_time_data.day, self.print_time_data.hour, self.print_time_data.minute));
                 if ui.add(egui::Button::new("Calculate Time")).clicked() {
                     self.error_line = -1;
-                    let result = calculate_print_time::calculate_print_time(self.gcode_text_editor.get_gcode_data());
+                    let result = calculate_print_time::calculate_print_time(&self.gcode_text_editor.text_edit.text);
                     match result {
                         Ok(n) => {
                             self.print_time = n;
@@ -73,6 +75,7 @@ impl eframe::App for MainApp{
                     ui.label(format!("Error occurred on line {} !!", self.error_line));
                 }
                 
+                //ui.set_max_width(300.0);
                 self.gcode_text_editor.update(ui)
                 //self.gcode_text_editor.update(ui)
             });
@@ -90,3 +93,4 @@ impl eframe::App for MainApp{
         });
     }
 }
+
