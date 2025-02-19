@@ -9,7 +9,6 @@ pub fn calculate_print_time(gcode_data: &Vec<String>) -> Result<f32, i32> {
     let mut speed: f32 = 0.0; //speed: mm/s
     //for line in gcode_data.lines() {
     for line in gcode_data {
-        //println!("Counter: {}", counter);
         counter += 1;
         if line.len() != 0 {
             //println!("c: {} = t:{}", counter, all_time);
@@ -18,14 +17,14 @@ pub fn calculate_print_time(gcode_data: &Vec<String>) -> Result<f32, i32> {
                 println!("ERROR:{}", counter-1);
                 return Err(counter-1)
             }
-            let comment_pos = line.find(';').unwrap_or(line.len());
+            let line_data = line.replace("\r", "");
+            let comment_pos = line_data.find(';').unwrap_or(line_data.len());
             let new_line = &line[..comment_pos];
             if new_line.len() == 0 {
                 continue;
             }
 
             let g: Vec<&str> = new_line.split(' ').collect();
-            //println!("Gcode: {}", g[0]);
             match g[0]{
                 "G1" => {
                     let mut x = now_pos.x;
@@ -69,7 +68,6 @@ pub fn calculate_print_time(gcode_data: &Vec<String>) -> Result<f32, i32> {
                     let target_vec = Vec3::new(x, y, z);
                     let move_vec = target_vec - now_pos;
                     let move_length = move_vec.length();
-
                     if x==now_pos.x && y==now_pos.y && z==now_pos.z && e != 0.0{
                         let time = e / speed; // time sec
                         all_time += time;
